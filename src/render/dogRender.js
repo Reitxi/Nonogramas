@@ -215,6 +215,14 @@ Nonogram.Render = (() => {
     g.fillCircle(cx, cy, r * 0.45);
   }
 
+  // Cuello alto de la prenda (como un jersey de cuello vuelto): sube casi hasta la
+  // barbilla para que la ropa abrace el cuello con normalidad, en vez de dejar un hueco
+  // de piel al descubierto. El collar se dibuja encima de esto, así que sigue asomando.
+  function turtleneck(g, color) {
+    setColor(g, color);
+    g.fillEllipse(100, 157, 72, 26);
+  }
+
   function drawDogBase(g) {
     // cuerpo
     bodySilhouette(g, DOG.furBase);
@@ -262,8 +270,7 @@ Nonogram.Render = (() => {
       name: 'Sudadera rosa kawaii',
       draw(g) {
         torsoFit(g, 0xffc6de);
-        setColor(g, 0xff9ec7);
-        g.fillEllipse(100, 174, safeWidth(174), 14);
+        turtleneck(g, 0xff9ec7);
         drawHeart(g, 100, 200, 15, 0xffffff);
         setColor(g, 0xff6fa5);
         g.fillCircle(100, 200, 3);
@@ -273,6 +280,7 @@ Nonogram.Render = (() => {
       name: 'Camiseta de rayitas pastel',
       draw(g) {
         torsoFit(g, 0xfff8ee);
+        turtleneck(g, 0x9fdfc4);
         setColor(g, 0x9fdfc4);
         [184, 194, 210].forEach((y) => g.fillEllipse(100, y, safeWidth(y), 11));
       },
@@ -281,8 +289,8 @@ Nonogram.Render = (() => {
       name: 'Chaqueta lavanda de flores',
       draw(g) {
         torsoFit(g, 0xd0bdf0);
+        turtleneck(g, 0xb49ddb);
         setColor(g, 0xb49ddb);
-        g.fillEllipse(100, 174, safeWidth(174), 14);
         g.fillRect(97, 179, 6, 39);
         drawFlower(g, 100, 191, 8, 0xffe1ef, 0xf1c40f);
         drawFlower(g, 100, 208, 8, 0xffe1ef, 0xf1c40f);
@@ -294,8 +302,7 @@ Nonogram.Render = (() => {
         setColor(g, 0xffb6c9);
         g.fillEllipse(100, 224, 90, 26);
         torsoFit(g, 0xffb6c9);
-        setColor(g, 0xffffff);
-        g.fillEllipse(100, 175, safeWidth(175) * 0.55, 10);
+        turtleneck(g, 0xffffff);
         drawFlower(g, 80, 192, 7, 0xffffff, 0xf7c9dc);
         drawFlower(g, 120, 192, 7, 0xffffff, 0xf7c9dc);
         drawFlower(g, 100, 210, 7, 0xffffff, 0xf7c9dc);
@@ -305,8 +312,7 @@ Nonogram.Render = (() => {
       name: 'Chaleco de corazones',
       draw(g) {
         torsoFit(g, 0xfff3e6);
-        setColor(g, 0xf4a7b9);
-        g.fillEllipse(100, 174, safeWidth(174), 12);
+        turtleneck(g, 0xf4a7b9);
         drawHeart(g, 84, 192, 8, 0xf4a7b9);
         drawHeart(g, 116, 192, 8, 0xf4a7b9);
         drawHeart(g, 100, 210, 8, 0xf4a7b9);
@@ -316,8 +322,7 @@ Nonogram.Render = (() => {
       name: 'Camiseta de estrellitas',
       draw(g) {
         torsoFit(g, 0xfff2a8);
-        setColor(g, 0xf7dd6c);
-        g.fillEllipse(100, 174, safeWidth(174), 14);
+        turtleneck(g, 0xf7dd6c);
         drawStar(g, 84, 194, 8, 0xffffff);
         drawStar(g, 116, 194, 8, 0xffffff);
         drawStar(g, 100, 212, 9, 0xffffff);
@@ -328,6 +333,7 @@ Nonogram.Render = (() => {
       draw(g) {
         // camiseta base bien contrastada con el pelaje (crema muy claro, casi blanco)
         torsoFit(g, 0xfff8ee);
+        turtleneck(g, 0xf3e6d0);
         setColor(g, 0x9fc6ea);
         g.fillRoundedRect(78, 180, 44, 44, 10);
         g.fillRoundedRect(74, 170, 9, 14, 4);
@@ -344,6 +350,7 @@ Nonogram.Render = (() => {
       name: 'Poncho arcoíris pastel',
       draw(g) {
         torsoFit(g, 0xfff8f0);
+        turtleneck(g, 0xffd9e6);
         const colors = [0xffb6c9, 0xffd9a0, 0xfff3a0, 0xb8e8c4, 0xaed6f1];
         const ys = [177, 184, 190, 196, 206];
         colors.forEach((c, i) => {
@@ -362,6 +369,7 @@ Nonogram.Render = (() => {
       name: 'Abrigo de nieve con pompones',
       draw(g) {
         torsoFit(g, 0xfbfcfe);
+        turtleneck(g, 0xdcecf9);
         setColor(g, 0xdcecf9);
         g.fillRect(97, 179, 6, 43);
         g.fillRect(100 - safeWidth(192) / 2, 192, safeWidth(192), 5);
@@ -375,6 +383,7 @@ Nonogram.Render = (() => {
       name: 'Pijama de nubes',
       draw(g) {
         torsoFit(g, 0xcfe8f7);
+        turtleneck(g, 0xffffff);
         setColor(g, 0xffffff);
         g.fillCircle(82, 189, 9);
         g.fillCircle(94, 187, 11);
