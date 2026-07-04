@@ -88,6 +88,66 @@ Nonogram.Render = (() => {
     g.fillPoints(TORSO_POINTS, true);
   }
 
+  // Perfil derecho del torso (x del contorno a cada altura y), para poder acotar
+  // cualquier decoración de ropa a un ancho seguro y que nunca sobresalga de la silueta.
+  const TORSO_PROFILE = [
+    { y: 150, x: 100 },
+    { y: 152, x: 122 },
+    { y: 160, x: 142 },
+    { y: 175, x: 153 },
+    { y: 195, x: 157 },
+    { y: 210, x: 153 },
+    { y: 222, x: 144 },
+    { y: 226, x: 100 },
+  ];
+
+  function torsoHalfWidth(y) {
+    const yy = Phaser.Math.Clamp(y, TORSO_PROFILE[0].y, TORSO_PROFILE[TORSO_PROFILE.length - 1].y);
+    for (let i = 0; i < TORSO_PROFILE.length - 1; i++) {
+      const a = TORSO_PROFILE[i];
+      const b = TORSO_PROFILE[i + 1];
+      if (yy >= a.y && yy <= b.y) {
+        const t = b.y === a.y ? 0 : (yy - a.y) / (b.y - a.y);
+        return a.x + t * (b.x - a.x) - 100;
+      }
+    }
+    return 0;
+  }
+
+  // Ancho seguro (con margen) para una decoración centrada en x=100 a una altura y dada,
+  // para que nunca sobresalga del contorno real del torso.
+  function safeWidth(y, margin) {
+    return torsoHalfWidth(y) * 2 * (margin === undefined ? 0.86 : margin);
+  }
+
+  function drawHeart(g, cx, cy, r, color) {
+    setColor(g, color);
+    g.fillCircle(cx - r * 0.5, cy - r * 0.35, r * 0.62);
+    g.fillCircle(cx + r * 0.5, cy - r * 0.35, r * 0.62);
+    g.fillTriangle(cx - r * 1.05, cy - r * 0.15, cx + r * 1.05, cy - r * 0.15, cx, cy + r * 0.95);
+  }
+
+  function drawStar(g, cx, cy, r, color) {
+    setColor(g, color);
+    const points = [];
+    for (let i = 0; i < 8; i++) {
+      const angle = (Math.PI / 4) * i - Math.PI / 2;
+      const rad = i % 2 === 0 ? r : r * 0.42;
+      points.push({ x: cx + Math.cos(angle) * rad, y: cy + Math.sin(angle) * rad });
+    }
+    g.fillPoints(points, true);
+  }
+
+  function drawFlower(g, cx, cy, r, petalColor, centerColor) {
+    setColor(g, petalColor);
+    for (let i = 0; i < 5; i++) {
+      const angle = (Math.PI * 2 * i) / 5;
+      g.fillCircle(cx + Math.cos(angle) * r * 0.8, cy + Math.sin(angle) * r * 0.8, r * 0.55);
+    }
+    setColor(g, centerColor);
+    g.fillCircle(cx, cy, r * 0.45);
+  }
+
   function drawDogBase(g) {
     // cuerpo
     bodySilhouette(g, DOG.furBase);
@@ -126,116 +186,122 @@ Nonogram.Render = (() => {
     g.fillCircle(125, 84, 3);
   }
 
-  // --- Ropa: cubre solo el torso (ver torsoFit) para que las patas queden a la vista ---
+  // --- Ropa: cubre solo el torso (ver torsoFit) para que las patas queden a la vista.
+  // Todas las decoraciones usan safeWidth(y) para no sobresalir nunca de la silueta real
+  // del torso (que se estrecha arriba y abajo), evitando el bug de "ropa que se sale del cuerpo".
   const CLOTHING = {
     sudadera: {
-      name: 'Sudadera azul',
+      name: 'Sudadera rosa kawaii',
       draw(g) {
-        torsoFit(g, 0x3498db);
-        setColor(g, 0x2874a6);
-        g.fillEllipse(100, 162, 70, 20);
-        g.fillRoundedRect(85, 200, 30, 14, 6);
+        torsoFit(g, 0xffc6de);
+        setColor(g, 0xff9ec7);
+        g.fillEllipse(100, 160, safeWidth(160), 14);
+        drawHeart(g, 100, 197, 15, 0xffffff);
+        setColor(g, 0xff6fa5);
+        g.fillCircle(100, 197, 3);
       },
     },
     rayas: {
-      name: 'Camiseta a rayas',
+      name: 'Camiseta de rayitas pastel',
       draw(g) {
-        torsoFit(g, 0xecf0f1);
-        setColor(g, 0xe74c3c);
-        g.fillEllipse(100, 178, 128, 12);
-        g.fillEllipse(100, 196, 132, 12);
-        g.fillEllipse(100, 214, 122, 12);
+        torsoFit(g, 0xfff8ee);
+        setColor(g, 0x9fdfc4);
+        [176, 193, 210].forEach((y) => g.fillEllipse(100, y, safeWidth(y), 11));
       },
     },
     chaqueta: {
-      name: 'Chaqueta verde',
+      name: 'Chaqueta lavanda de flores',
       draw(g) {
-        torsoFit(g, 0x27ae60);
-        setColor(g, 0x1e8449);
-        g.fillEllipse(100, 162, 70, 20);
-        g.fillRect(97, 172, 6, 50);
-        setColor(g, 0xf1c40f);
-        g.fillCircle(100, 186, 4);
-        g.fillCircle(100, 202, 4);
-        g.fillCircle(100, 218, 4);
+        torsoFit(g, 0xd0bdf0);
+        setColor(g, 0xb49ddb);
+        g.fillEllipse(100, 160, safeWidth(160), 14);
+        g.fillRect(97, 168, 6, 50);
+        drawFlower(g, 100, 188, 8, 0xffe1ef, 0xf1c40f);
+        drawFlower(g, 100, 208, 8, 0xffe1ef, 0xf1c40f);
       },
     },
     vestido: {
-      name: 'Vestido rosa',
+      name: 'Vestido de flores',
       draw(g) {
-        setColor(g, 0xf78fb3);
-        g.fillEllipse(100, 222, 150, 36);
-        torsoFit(g, 0xf78fb3);
+        setColor(g, 0xffb6c9);
+        g.fillEllipse(100, 224, 90, 26);
+        torsoFit(g, 0xffb6c9);
         setColor(g, 0xffffff);
-        g.fillEllipse(100, 162, 20, 12);
+        g.fillEllipse(100, 162, safeWidth(162) * 0.55, 10);
+        drawFlower(g, 80, 190, 7, 0xffffff, 0xf7c9dc);
+        drawFlower(g, 120, 190, 7, 0xffffff, 0xf7c9dc);
+        drawFlower(g, 100, 210, 7, 0xffffff, 0xf7c9dc);
       },
     },
     chaleco: {
-      name: 'Chaleco a cuadros',
+      name: 'Chaleco de corazones',
       draw(g) {
-        torsoFit(g, 0xf5eee6);
-        setColor(g, 0x8d6748);
-        for (let row = 0; row < 2; row++) {
-          for (let col = 0; col < 3; col++) {
-            if ((row + col) % 2 === 0) {
-              g.fillRect(78 + col * 16, 184 + row * 17, 14, 14);
-            }
-          }
-        }
+        torsoFit(g, 0xfff3e6);
+        setColor(g, 0xf4a7b9);
+        g.fillEllipse(100, 160, safeWidth(160), 12);
+        drawHeart(g, 84, 190, 8, 0xf4a7b9);
+        drawHeart(g, 116, 190, 8, 0xf4a7b9);
+        drawHeart(g, 100, 210, 8, 0xf4a7b9);
       },
     },
     camiseta: {
-      name: 'Camiseta amarilla',
+      name: 'Camiseta de estrellitas',
       draw(g) {
-        torsoFit(g, 0xf4d03f);
-        setColor(g, 0xd4ac0d);
-        g.fillEllipse(100, 162, 66, 18);
+        torsoFit(g, 0xfff2a8);
+        setColor(g, 0xf7dd6c);
+        g.fillEllipse(100, 160, safeWidth(160), 14);
+        drawStar(g, 84, 192, 8, 0xffffff);
+        drawStar(g, 116, 192, 8, 0xffffff);
+        drawStar(g, 100, 212, 9, 0xffffff);
       },
     },
     peto: {
-      name: 'Peto vaquero',
+      name: 'Peto con margaritas',
       draw(g) {
-        torsoFit(g, 0xecf0f1);
-        setColor(g, 0x4a69bd);
-        g.fillRoundedRect(78, 168, 44, 52, 8);
-        g.fillRoundedRect(72, 155, 10, 20, 4);
-        g.fillRoundedRect(118, 155, 10, 20, 4);
-        setColor(g, 0xf4d03f);
-        g.fillCircle(100, 180, 3.5);
+        torsoFit(g, 0xf5eee6);
+        setColor(g, 0xaecbec);
+        g.fillRoundedRect(78, 168, 44, 52, 10);
+        g.fillRoundedRect(74, 155, 9, 20, 4);
+        g.fillRoundedRect(117, 155, 9, 20, 4);
+        drawFlower(g, 100, 182, 7, 0xffffff, 0xf1c40f);
       },
     },
     poncho: {
-      name: 'Poncho arcoíris',
+      name: 'Poncho arcoíris pastel',
       draw(g) {
-        torsoFit(g, 0xecf0f1);
-        const colors = [0xe74c3c, 0xf39c12, 0xf1c40f, 0x27ae60, 0x3498db, 0x8e44ad];
+        torsoFit(g, 0xfff8f0);
+        const colors = [0xffb6c9, 0xffd9a0, 0xfff3a0, 0xb8e8c4, 0xaed6f1, 0xd6b8f0];
+        const ys = [168, 178, 188, 198, 208, 217];
         colors.forEach((c, i) => {
           setColor(g, c);
-          g.fillEllipse(100, 166 + i * 10, 132 - i * 6, 10);
+          g.fillEllipse(100, ys[i], safeWidth(ys[i]), 11);
         });
       },
     },
     abrigo: {
-      name: 'Abrigo de invierno',
+      name: 'Abrigo de nieve con pompones',
       draw(g) {
-        torsoFit(g, 0xf5f5f5);
-        setColor(g, 0xd6dbdf);
+        torsoFit(g, 0xfbfcfe);
+        setColor(g, 0xdcecf9);
         g.fillRect(97, 168, 6, 54);
-        g.fillRect(62, 188, 80, 6);
-        g.fillRect(62, 208, 80, 6);
+        g.fillRect(100 - safeWidth(190) / 2, 190, safeWidth(190), 5);
+        g.fillRect(100 - safeWidth(208) / 2, 208, safeWidth(208), 5);
         setColor(g, 0xffffff);
-        [66, 82, 100, 118, 134].forEach((x) => g.fillCircle(x, 163, 8));
+        const pomWidth = safeWidth(163);
+        [-0.36, -0.18, 0, 0.18, 0.36].forEach((f) => g.fillCircle(100 + f * pomWidth, 163, 8));
       },
     },
-    futbol: {
-      name: 'Camiseta de fútbol',
+    pijama: {
+      name: 'Pijama de nubes',
       draw(g) {
-        torsoFit(g, 0xffffff);
-        setColor(g, 0xe74c3c);
-        g.fillEllipse(100, 162, 70, 18);
-        g.fillRect(94, 175, 12, 45);
-        setColor(g, 0x2c3e50);
-        g.fillCircle(100, 198, 8);
+        torsoFit(g, 0xcfe8f7);
+        setColor(g, 0xffffff);
+        g.fillCircle(82, 186, 9);
+        g.fillCircle(94, 182, 11);
+        g.fillCircle(108, 184, 10);
+        g.fillCircle(96, 208, 8);
+        g.fillCircle(108, 210, 10);
+        g.fillCircle(120, 206, 8);
       },
     },
   };
@@ -483,81 +549,103 @@ Nonogram.Render = (() => {
   // --- Cajón / asiento: detrás del perro, parte inferior del lienzo ---
   const DRAWER = {
     caja: {
-      name: 'Caja de madera',
+      name: 'Cajita de regalo',
       draw(g) {
-        setColor(g, 0xa1662f);
-        g.fillRoundedRect(14, 214, 172, 46, 10);
-        setColor(g, 0x7a4a1f);
-        g.fillRect(14, 228, 172, 4);
-        g.fillRect(14, 244, 172, 4);
+        setColor(g, 0xffd3e8);
+        g.fillRoundedRect(14, 214, 172, 46, 12);
+        setColor(g, 0xff9ec7);
+        g.fillRect(94, 214, 12, 46);
+        g.fillRect(14, 231, 172, 10);
+        setColor(g, 0xff6fa5);
+        g.fillTriangle(78, 204, 100, 216, 78, 224);
+        g.fillTriangle(122, 204, 100, 216, 122, 224);
+        g.fillCircle(100, 216, 5);
       },
     },
     cesta: {
-      name: 'Cesta',
+      name: 'Cestita con corazón',
       draw(g) {
-        setColor(g, 0xd2a679);
+        setColor(g, 0xf3d9b1);
         g.fillRoundedRect(14, 214, 172, 46, 20);
-        g.lineStyle(3, 0xa67c46, 1);
+        g.lineStyle(3, 0xd8b98a, 1);
         for (let y = 220; y <= 252; y += 9) {
           g.beginPath();
           g.moveTo(18, y);
           g.lineTo(182, y);
           g.strokePath();
         }
+        drawHeart(g, 100, 216, 9, 0xf4a7b9);
       },
     },
     cojin: {
-      name: 'Cojín',
+      name: 'Cojín de nube',
       draw(g) {
-        setColor(g, 0xf39fc0);
-        g.fillEllipse(100, 240, 176, 48);
-        setColor(g, 0xc2185b);
-        g.fillCircle(90, 240, 4);
-        g.fillCircle(110, 240, 4);
+        setColor(g, 0xeaf6ff);
+        g.fillCircle(66, 244, 22);
+        g.fillCircle(92, 232, 26);
+        g.fillCircle(122, 232, 26);
+        g.fillCircle(148, 244, 22);
+        g.fillRoundedRect(56, 240, 100, 26, 16);
+        setColor(g, 0xbfe3f7);
+        g.fillCircle(90, 244, 3);
+        g.fillCircle(110, 244, 3);
       },
     },
     manta: {
-      name: 'Manta plegada',
+      name: 'Manta de rayitas pastel',
       draw(g) {
-        setColor(g, 0x5dade2);
-        g.fillRoundedRect(14, 214, 172, 46, 10);
-        setColor(g, 0x2e86c1);
+        setColor(g, 0xffe9c7);
+        g.fillRoundedRect(14, 214, 172, 46, 12);
+        setColor(g, 0xffcf94);
         g.fillRect(14, 223, 172, 5);
         g.fillRect(14, 238, 172, 5);
         g.fillRect(14, 253, 172, 4);
       },
     },
     alfombra: {
-      name: 'Alfombra redonda',
+      name: 'Alfombra arcoíris pastel',
       draw(g) {
-        setColor(g, 0x48c9b0);
-        g.fillEllipse(100, 248, 182, 36);
-        g.lineStyle(4, 0x117864, 1);
-        g.strokeEllipse(100, 248, 152, 24);
+        const colors = [0xffd3e0, 0xffe7c2, 0xfff6b8, 0xc9f0d1, 0xc6e6fb];
+        colors.forEach((c, i) => {
+          setColor(g, c);
+          g.fillEllipse(100, 248, 182 - i * 16, 36 - i * 3);
+        });
       },
     },
     cama: {
-      name: 'Cama de perro',
+      name: 'Cama con corazones',
       draw(g) {
-        setColor(g, 0xa9cce3);
+        setColor(g, 0xffe1ec);
         g.fillEllipse(100, 244, 178, 44);
-        g.lineStyle(10, 0x5dade2, 1);
+        g.lineStyle(9, 0xffb6c9, 1);
         g.strokeEllipse(100, 240, 166, 34);
+        drawHeart(g, 100, 240, 9, 0xff9ec7);
       },
     },
     tronco: {
-      name: 'Tronco',
+      name: 'Tronco con setas',
       draw(g) {
-        setColor(g, 0x8b5a2b);
+        setColor(g, 0xc39066);
         g.fillRoundedRect(24, 210, 152, 50, 14);
-        g.lineStyle(3, 0x6b4423, 1);
+        g.lineStyle(3, 0x9c6b41, 1);
         g.strokeEllipse(48, 235, 30, 46);
         g.strokeEllipse(100, 235, 20, 46);
         g.strokeEllipse(150, 235, 26, 46);
+        setColor(g, 0xffffff);
+        g.fillRect(132, 202, 5, 10);
+        g.fillRect(150, 200, 5, 12);
+        setColor(g, 0xe74c3c);
+        g.fillCircle(134, 198, 8);
+        g.fillCircle(152, 196, 9);
+        setColor(g, 0xffffff);
+        g.fillCircle(131, 195, 2);
+        g.fillCircle(137, 200, 2);
+        g.fillCircle(149, 193, 2);
+        g.fillCircle(155, 199, 2);
       },
     },
     nube: {
-      name: 'Nube',
+      name: 'Nube con estrellas',
       draw(g) {
         setColor(g, 0xffffff);
         g.fillCircle(60, 236, 26);
@@ -565,28 +653,37 @@ Nonogram.Render = (() => {
         g.fillCircle(124, 222, 30);
         g.fillCircle(150, 236, 26);
         g.fillRect(50, 236, 110, 22);
+        drawStar(g, 40, 214, 6, 0xffe27a);
+        drawStar(g, 164, 210, 7, 0xffe27a);
+        drawStar(g, 100, 200, 5, 0xffe27a);
       },
     },
     hierba: {
-      name: 'Parche de hierba',
+      name: 'Jardín de flores',
       draw(g) {
-        setColor(g, 0x58d68d);
+        setColor(g, 0x8fe0a8);
         g.fillRoundedRect(14, 226, 172, 34, 8);
-        setColor(g, 0x2ecc71);
+        setColor(g, 0x6fd191);
         for (let x = 22; x <= 178; x += 12) {
-          g.fillTriangle(x - 6, 226, x + 6, 226, x, 206);
+          g.fillTriangle(x - 5, 226, x + 5, 226, x, 210);
         }
+        drawFlower(g, 45, 218, 6, 0xffb6c9, 0xfff3a0);
+        drawFlower(g, 100, 214, 6, 0xffffff, 0xfff3a0);
+        drawFlower(g, 155, 218, 6, 0xaed6f1, 0xfff3a0);
       },
     },
-    circo: {
-      name: 'Alfombra de circo',
+    lunares: {
+      name: 'Alfombra de lunares pastel',
       draw(g) {
-        const colors = [0xe74c3c, 0xf1c40f, 0xe74c3c, 0xf1c40f];
-        const sizes = [182, 140, 98, 56];
-        colors.forEach((c, i) => {
-          setColor(g, c);
-          g.fillEllipse(100, 248, sizes[i], sizes[i] * 0.22);
-        });
+        setColor(g, 0xfff0f5);
+        g.fillEllipse(100, 248, 182, 40);
+        const dots = [0xffb6c9, 0xaed6f1, 0xfff3a0, 0xc9f0d1, 0xd6b8f0];
+        let i = 0;
+        for (let x = 34; x <= 166; x += 22) {
+          setColor(g, dots[i % dots.length]);
+          g.fillCircle(x, 248, 9);
+          i += 1;
+        }
       },
     },
   };
