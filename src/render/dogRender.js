@@ -442,6 +442,7 @@ Nonogram.Render = (() => {
       name: 'Corona',
       draw(g) {
         setColor(g, 0xf1c40f);
+        g.fillEllipse(100, 76, 90, 14);
         g.fillPoints(
           [
             { x: 58, y: 78 }, { x: 62, y: 46 }, { x: 78, y: 64 },
@@ -466,45 +467,53 @@ Nonogram.Render = (() => {
         g.fillRect(94, 87, 12, 5);
       },
     },
-    conejo: {
-      name: 'Orejas de conejo',
+    fiesta: {
+      name: 'Gorro de fiesta',
       draw(g) {
+        setColor(g, 0x8e44ad);
+        g.fillEllipse(100, 78, 76, 16);
+        g.fillTriangle(64, 80, 136, 80, 100, 26);
         setColor(g, 0xffffff);
-        g.fillEllipse(78, 34, 20, 58);
-        g.fillEllipse(122, 34, 20, 58);
-        setColor(g, 0xf5b7b1);
-        g.fillEllipse(78, 38, 9, 38);
-        g.fillEllipse(122, 38, 9, 38);
-        setColor(g, 0xecf0f1);
-        g.fillEllipse(100, 66, 92, 14);
+        g.fillCircle(85, 64, 3.5);
+        g.fillCircle(115, 64, 3.5);
+        g.fillCircle(90, 72, 3.5);
+        g.fillCircle(110, 72, 3.5);
+        g.fillCircle(100, 68, 3.5);
+        setColor(g, 0xe74c3c);
+        g.fillCircle(100, 26, 8);
       },
     },
-    navidad: {
-      name: 'Gorro navideño',
+    mago: {
+      name: 'Sombrero de mago',
       draw(g) {
-        setColor(g, 0xc0392b);
+        setColor(g, 0x4b3f8f);
+        g.fillEllipse(100, 78, 108, 14);
+        g.fillTriangle(68, 80, 132, 80, 100, 20);
+        setColor(g, 0xf1c40f);
+        g.fillEllipse(100, 66, 66, 9);
+        drawStar(g, 88, 46, 5, 0xffffff);
+        drawStar(g, 112, 36, 4, 0xffffff);
+      },
+    },
+    graduacion: {
+      name: 'Birrete de graduación',
+      draw(g) {
+        setColor(g, 0x2c3e50);
+        g.fillEllipse(100, 68, 66, 22);
         g.fillPoints(
           [
-            { x: 62, y: 78 }, { x: 70, y: 40 }, { x: 118, y: 30 }, { x: 138, y: 46 },
+            { x: 48, y: 58 }, { x: 100, y: 38 }, { x: 152, y: 58 }, { x: 100, y: 78 },
           ],
           true
         );
-        setColor(g, 0xffffff);
-        g.fillEllipse(100, 78, 100, 16);
-        g.fillCircle(138, 42, 9);
-      },
-    },
-    pirata: {
-      name: 'Pañuelo pirata',
-      draw(g) {
-        setColor(g, 0x2c3e50);
-        g.fillEllipse(100, 68, 104, 44);
-        setColor(g, 0xffffff);
-        g.fillCircle(84, 58, 4);
-        g.fillCircle(100, 66, 4);
-        g.fillCircle(116, 58, 4);
-        setColor(g, 0x2c3e50);
-        g.fillTriangle(140, 66, 158, 58, 156, 76);
+        setColor(g, 0xf1c40f);
+        g.fillCircle(100, 58, 4);
+        g.lineStyle(3, 0xf1c40f, 1);
+        g.beginPath();
+        g.moveTo(100, 58);
+        g.lineTo(118, 74);
+        g.strokePath();
+        g.fillCircle(118, 78, 5);
       },
     },
   };
@@ -556,7 +565,7 @@ Nonogram.Render = (() => {
       name: 'Collar de flores',
       draw(g) {
         collarBand(g, 150, 20, 8, 4, 0x27ae60);
-        [72, 86, 100, 114, 128].forEach((x) => drawFlower(g, x, x === 100 ? 162 : 156, 5, 0xe91e63, 0xf1c40f));
+        [82, 91, 100, 109, 118].forEach((x) => drawFlower(g, x, x === 100 ? 161 : 156, 4.5, 0xe91e63, 0xf1c40f));
       },
     },
     perlas: {
@@ -564,10 +573,10 @@ Nonogram.Render = (() => {
       draw(g) {
         setColor(g, 0xfdfefe);
         const pearls = [
-          { x: 72, y: 148 }, { x: 83, y: 155 }, { x: 92, y: 160 }, { x: 100, y: 162 },
-          { x: 108, y: 160 }, { x: 117, y: 155 }, { x: 128, y: 148 },
+          { x: 80, y: 148 }, { x: 88, y: 154 }, { x: 95, y: 159 }, { x: 100, y: 161 },
+          { x: 105, y: 159 }, { x: 112, y: 154 }, { x: 120, y: 148 },
         ];
-        pearls.forEach((p) => g.fillCircle(p.x, p.y, 5));
+        pearls.forEach((p) => g.fillCircle(p.x, p.y, 4.5));
       },
     },
     campana: {
@@ -582,13 +591,16 @@ Nonogram.Render = (() => {
         g.fillCircle(100, 171, 2.2);
       },
     },
-    corbata: {
-      name: 'Corbata',
+    panuelo: {
+      name: 'Pañuelo',
       draw(g) {
-        collarBand(g, 148, 20, 7, 5, 0x2c3e50);
-        setColor(g, 0xc0392b);
-        g.fillTriangle(93, 152, 107, 152, 100, 166);
-        g.fillTriangle(95, 166, 105, 166, 100, 195);
+        collarBand(g, 149, 20, 8, 6, 0xe74c3c);
+        setColor(g, 0xe74c3c);
+        g.fillTriangle(85, 154, 115, 154, 100, 182);
+        setColor(g, 0xffffff);
+        g.fillCircle(93, 163, 2.2);
+        g.fillCircle(100, 170, 2.2);
+        g.fillCircle(107, 163, 2.2);
       },
     },
     estrellas: {
