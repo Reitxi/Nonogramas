@@ -65,14 +65,16 @@ Nonogram.Scenes.CustomizeScene = class CustomizeScene extends Phaser.Scene {
     this.itemListGroup.clear(true, true);
     const startX = 520;
     const startY = 80;
-    const itemW = 160;
-    const itemH = 60;
-    const gap = 12;
+    const cols = 2;
+    const itemW = 150;
+    const itemH = 54;
+    const gapX = 14;
+    const gapY = 10;
 
     if (this.activeTab === 'background') {
       Nonogram.Customization.backgrounds.forEach((bg, i) => {
-        const x = startX;
-        const y = startY + i * (itemH + gap);
+        const x = startX + (i % cols) * (itemW + gapX);
+        const y = startY + Math.floor(i / cols) * (itemH + gapY);
         const swatch = this.add
           .rectangle(x, y, itemW, itemH, Phaser.Display.Color.HexStringToColor(bg.color).color)
           .setOrigin(0, 0)
@@ -94,15 +96,15 @@ Nonogram.Scenes.CustomizeScene = class CustomizeScene extends Phaser.Scene {
 
     const category = this.activeTab;
     Nonogram.Customization.items[category].forEach((item, i) => {
-      const x = startX;
-      const y = startY + i * (itemH + gap);
+      const x = startX + (i % cols) * (itemW + gapX);
+      const y = startY + Math.floor(i / cols) * (itemH + gapY);
       const box = this.add
         .rectangle(x, y, itemW, itemH, 0xffffff, 0.85)
         .setOrigin(0, 0)
         .setInteractive({ useHandCursor: true });
       const label = this.add
         .text(x + itemW / 2, y + itemH / 2, item.name, {
-          fontSize: '14px',
+          fontSize: '13px',
           color: '#2c3e50',
           align: 'center',
           wordWrap: { width: itemW - 10 },
