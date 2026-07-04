@@ -18,45 +18,44 @@ Nonogram.Render = (() => {
   // encajen siempre en el mismo sitio sin tapar ojos ni esconder las patas:
   //   cabeza: centro (100,98) r=48x44 → ocupa y 54-142
   //   ojos:   y=88 → ocupa y 80-96 (los accesorios de cabeza no deben bajar de y=80)
-  //   cuerpo: centro (100,205) r=72x52 → ocupa y 153-257
-  //   patas:  se dibujan las últimas, para quedar siempre por delante del cuerpo
+  //   torso:  y 148-228, más ancho en el pecho (y≈196) que en los hombros o la cintura
+  //   patas:  y 206-259, sombreadas más oscuras que el torso para distinguirlas bien
 
   function setColor(g, color, alpha) {
     g.fillStyle(color, alpha === undefined ? 1 : alpha);
   }
 
-  // Silueta del cuerpo SENTADO como una sola forma (torso + patas delanteras con un
-  // hueco entre ellas), en vez de un óvalo con círculos pegados encima — así se lee
-  // como un perro de verdad y las patas nunca quedan tapadas por el propio cuerpo.
+  // Silueta del cuerpo SENTADO como una sola forma (torso + cuartos traseros + patas
+  // delanteras con un hueco entre ellas), pensada para leerse como un perro sentado:
+  // hombros estrechos, pecho ancho, cintura entrada y cuartos traseros que vuelven a
+  // ensancharse justo antes de las patas (la típica silueta triangular de un perro sentado).
   const BODY_POINTS = [
-    { x: 100, y: 150 },
-    { x: 122, y: 152 },
-    { x: 142, y: 160 },
-    { x: 153, y: 175 },
-    { x: 157, y: 195 },
-    { x: 154, y: 208 },
-    { x: 151, y: 218 },
-    { x: 155, y: 230 },
-    { x: 153, y: 242 },
-    { x: 144, y: 253 },
-    { x: 130, y: 259 },
-    { x: 118, y: 259 },
-    { x: 108, y: 253 },
-    { x: 103, y: 242 },
-    { x: 100, y: 230 },
-    { x: 97, y: 242 },
-    { x: 92, y: 253 },
-    { x: 82, y: 259 },
-    { x: 70, y: 259 },
-    { x: 56, y: 253 },
-    { x: 47, y: 242 },
-    { x: 49, y: 230 },
-    { x: 45, y: 218 },
-    { x: 46, y: 208 },
-    { x: 43, y: 195 },
-    { x: 47, y: 175 },
-    { x: 58, y: 160 },
-    { x: 78, y: 152 },
+    { x: 100, y: 148 },
+    { x: 126, y: 150 },
+    { x: 146, y: 158 },
+    { x: 158, y: 175 },
+    { x: 163, y: 196 },
+    { x: 159, y: 214 },
+    { x: 163, y: 228 },
+    { x: 158, y: 244 },
+    { x: 150, y: 256 },
+    { x: 138, y: 259 },
+    { x: 120, y: 259 },
+    { x: 108, y: 252 },
+    { x: 102, y: 238 },
+    { x: 100, y: 228 },
+    { x: 98, y: 238 },
+    { x: 92, y: 252 },
+    { x: 80, y: 259 },
+    { x: 62, y: 259 },
+    { x: 50, y: 256 },
+    { x: 42, y: 244 },
+    { x: 37, y: 228 },
+    { x: 41, y: 214 },
+    { x: 37, y: 196 },
+    { x: 42, y: 175 },
+    { x: 54, y: 158 },
+    { x: 74, y: 150 },
   ];
 
   function bodySilhouette(g, color) {
@@ -64,23 +63,73 @@ Nonogram.Render = (() => {
     g.fillPoints(BODY_POINTS, true);
   }
 
-  // La ropa solo cubre el torso (hasta justo antes de la muesca de las patas), para que
-  // las patas siempre se vean con su color de pelaje natural por debajo de la prenda.
+  // Sombreado de cuartos traseros + patas delanteras: una capa algo más oscura que el
+  // torso, pintada encima de la silueta base, para que las patas se distingan del cuerpo
+  // incluso sin ropa (antes todo era un único tono plano y no se apreciaba dónde acababa
+  // el torso y empezaban las patas).
+  const LEG_SHADE_POINTS = [
+    { x: 163, y: 228 },
+    { x: 158, y: 244 },
+    { x: 150, y: 256 },
+    { x: 138, y: 259 },
+    { x: 120, y: 259 },
+    { x: 108, y: 252 },
+    { x: 102, y: 238 },
+    { x: 100, y: 228 },
+    { x: 98, y: 238 },
+    { x: 92, y: 252 },
+    { x: 80, y: 259 },
+    { x: 62, y: 259 },
+    { x: 50, y: 256 },
+    { x: 42, y: 244 },
+    { x: 37, y: 228 },
+    { x: 41, y: 214 },
+    { x: 60, y: 206 },
+    { x: 100, y: 210 },
+    { x: 140, y: 206 },
+    { x: 159, y: 214 },
+  ];
+
+  function drawLegsAndPaws(g) {
+    setColor(g, DOG.furShadow);
+    g.fillPoints(LEG_SHADE_POINTS, true);
+
+    // patas: manchas más claras al final de cada pata + líneas de separación de dedos
+    setColor(g, DOG.furLight);
+    g.fillEllipse(129, 252, 38, 18);
+    g.fillEllipse(71, 252, 38, 18);
+    g.lineStyle(2, DOG.furShadow, 0.55);
+    [116, 129, 142].forEach((x) => {
+      g.beginPath();
+      g.moveTo(x, 246);
+      g.lineTo(x, 258);
+      g.strokePath();
+    });
+    [58, 71, 84].forEach((x) => {
+      g.beginPath();
+      g.moveTo(x, 246);
+      g.lineTo(x, 258);
+      g.strokePath();
+    });
+  }
+
+  // La ropa solo cubre el torso (hasta justo antes de los cuartos traseros), para que
+  // las patas siempre se vean con su color natural por debajo de la prenda.
   const TORSO_POINTS = [
-    { x: 100, y: 150 },
-    { x: 122, y: 152 },
-    { x: 142, y: 160 },
-    { x: 153, y: 175 },
-    { x: 157, y: 195 },
-    { x: 153, y: 210 },
-    { x: 144, y: 222 },
-    { x: 100, y: 226 },
-    { x: 56, y: 222 },
-    { x: 47, y: 210 },
-    { x: 43, y: 195 },
-    { x: 47, y: 175 },
-    { x: 58, y: 160 },
-    { x: 78, y: 152 },
+    { x: 100, y: 148 },
+    { x: 126, y: 150 },
+    { x: 146, y: 158 },
+    { x: 158, y: 175 },
+    { x: 163, y: 196 },
+    { x: 159, y: 213 },
+    { x: 148, y: 224 },
+    { x: 100, y: 228 },
+    { x: 52, y: 224 },
+    { x: 41, y: 213 },
+    { x: 37, y: 196 },
+    { x: 42, y: 175 },
+    { x: 54, y: 158 },
+    { x: 74, y: 150 },
   ];
 
   function torsoFit(g, color) {
@@ -91,14 +140,14 @@ Nonogram.Render = (() => {
   // Perfil derecho del torso (x del contorno a cada altura y), para poder acotar
   // cualquier decoración de ropa a un ancho seguro y que nunca sobresalga de la silueta.
   const TORSO_PROFILE = [
-    { y: 150, x: 100 },
-    { y: 152, x: 122 },
-    { y: 160, x: 142 },
-    { y: 175, x: 153 },
-    { y: 195, x: 157 },
-    { y: 210, x: 153 },
-    { y: 222, x: 144 },
-    { y: 226, x: 100 },
+    { y: 148, x: 100 },
+    { y: 150, x: 126 },
+    { y: 158, x: 146 },
+    { y: 175, x: 158 },
+    { y: 196, x: 163 },
+    { y: 213, x: 159 },
+    { y: 224, x: 148 },
+    { y: 228, x: 100 },
   ];
 
   function torsoHalfWidth(y) {
@@ -138,6 +187,26 @@ Nonogram.Render = (() => {
     g.fillPoints(points, true);
   }
 
+  // Banda de collar: solo el arco delantero (lados + parte de abajo), nunca un óvalo
+  // cerrado, para que la parte de atrás quede oculta detrás del cuello del perro en vez
+  // de flotar por delante como si el collar no lo rodeara de verdad.
+  function collarBand(g, cy, rx, ry, lineWidth, color) {
+    g.lineStyle(lineWidth, color, 1);
+    g.beginPath();
+    const steps = 28;
+    const a0 = 12;
+    const a1 = 168;
+    for (let i = 0; i <= steps; i++) {
+      const t = a0 + ((a1 - a0) * i) / steps;
+      const rad = Phaser.Math.DegToRad(t);
+      const x = 100 + rx * Math.cos(rad);
+      const y = cy + ry * Math.sin(rad);
+      if (i === 0) g.moveTo(x, y);
+      else g.lineTo(x, y);
+    }
+    g.strokePath();
+  }
+
   function drawFlower(g, cx, cy, r, petalColor, centerColor) {
     setColor(g, petalColor);
     for (let i = 0; i < 5; i++) {
@@ -151,10 +220,11 @@ Nonogram.Render = (() => {
   function drawDogBase(g) {
     // cuerpo
     bodySilhouette(g, DOG.furBase);
+    drawLegsAndPaws(g);
 
     // cuello (rellena el hueco entre cabeza y cuerpo)
     setColor(g, DOG.furBase);
-    g.fillEllipse(100, 132, 88, 60);
+    g.fillEllipse(100, 130, 88, 60);
 
     // orejas caídas (detrás de la cabeza)
     setColor(g, DOG.furShadow);
@@ -258,24 +328,36 @@ Nonogram.Render = (() => {
     peto: {
       name: 'Peto con margaritas',
       draw(g) {
-        torsoFit(g, 0xf5eee6);
-        setColor(g, 0xaecbec);
-        g.fillRoundedRect(78, 168, 44, 52, 10);
-        g.fillRoundedRect(74, 155, 9, 20, 4);
-        g.fillRoundedRect(117, 155, 9, 20, 4);
-        drawFlower(g, 100, 182, 7, 0xffffff, 0xf1c40f);
+        // camiseta base bien contrastada con el pelaje (crema muy claro, casi blanco)
+        torsoFit(g, 0xfff8ee);
+        setColor(g, 0x9fc6ea);
+        g.fillRoundedRect(78, 170, 44, 54, 10);
+        g.fillRoundedRect(74, 154, 9, 22, 4);
+        g.fillRoundedRect(117, 154, 9, 22, 4);
+        setColor(g, 0x7fb0dd);
+        g.fillCircle(78, 174, 4);
+        g.fillCircle(122, 174, 4);
+        setColor(g, 0x87b8e0);
+        g.fillRoundedRect(90, 196, 20, 16, 4);
+        drawFlower(g, 100, 184, 7, 0xffffff, 0xf1c40f);
       },
     },
     poncho: {
       name: 'Poncho arcoíris pastel',
       draw(g) {
         torsoFit(g, 0xfff8f0);
-        const colors = [0xffb6c9, 0xffd9a0, 0xfff3a0, 0xb8e8c4, 0xaed6f1, 0xd6b8f0];
-        const ys = [168, 178, 188, 198, 208, 217];
+        const colors = [0xffb6c9, 0xffd9a0, 0xfff3a0, 0xb8e8c4, 0xaed6f1];
+        const ys = [166, 176, 186, 196, 206];
         colors.forEach((c, i) => {
           setColor(g, c);
-          g.fillEllipse(100, ys[i], safeWidth(ys[i]), 11);
+          g.fillEllipse(100, ys[i], safeWidth(ys[i]), 10);
         });
+        // flecos colgando del borde inferior, la seña de identidad del poncho
+        setColor(g, 0xe8b7c9);
+        const hemHalf = safeWidth(214) / 2;
+        for (let x = 100 - hemHalf + 6; x <= 100 + hemHalf - 6; x += 11) {
+          g.fillTriangle(x - 4, 212, x + 4, 212, x, 222);
+        }
       },
     },
     abrigo: {
@@ -395,13 +477,13 @@ Nonogram.Render = (() => {
       name: 'Orejas de conejo',
       draw(g) {
         setColor(g, 0xffffff);
-        g.fillEllipse(78, 40, 22, 62);
-        g.fillEllipse(122, 40, 22, 62);
+        g.fillEllipse(78, 34, 20, 58);
+        g.fillEllipse(122, 34, 20, 58);
         setColor(g, 0xf5b7b1);
-        g.fillEllipse(78, 44, 10, 42);
-        g.fillEllipse(122, 44, 10, 42);
+        g.fillEllipse(78, 38, 9, 38);
+        g.fillEllipse(122, 38, 9, 38);
         setColor(g, 0xecf0f1);
-        g.fillEllipse(100, 80, 96, 14);
+        g.fillEllipse(100, 66, 92, 14);
       },
     },
     navidad: {
@@ -410,13 +492,13 @@ Nonogram.Render = (() => {
         setColor(g, 0xc0392b);
         g.fillPoints(
           [
-            { x: 56, y: 82 }, { x: 70, y: 40 }, { x: 130, y: 34 }, { x: 138, y: 44 },
+            { x: 62, y: 78 }, { x: 70, y: 40 }, { x: 118, y: 30 }, { x: 138, y: 46 },
           ],
           true
         );
         setColor(g, 0xffffff);
-        g.fillEllipse(60, 82, 96, 16);
-        g.fillCircle(136, 42, 9);
+        g.fillEllipse(100, 78, 100, 16);
+        g.fillCircle(138, 42, 9);
       },
     },
     pirata: {
@@ -434,60 +516,54 @@ Nonogram.Render = (() => {
     },
   };
 
-  // --- Collar: banda justo debajo de la barbilla, sobre el pecho ---
+  // --- Collar: banda justo debajo de la barbilla, sobre el pecho. Se dibuja DESPUÉS de la
+  // ropa (ver order en buildDogContainer) para que sus detalles nunca queden tapados por
+  // ninguna prenda, igual que un collar real, que siempre queda por fuera de la ropa.
   const COLLAR = {
     rojo: {
       name: 'Collar rojo',
       draw(g) {
-        g.lineStyle(9, 0xc0392b, 1);
-        g.strokeEllipse(100, 158, 80, 22);
+        collarBand(g, 160, 38, 10, 9, 0xc0392b);
         setColor(g, 0xf1c40f);
-        g.fillCircle(100, 168, 5);
+        g.fillCircle(100, 172, 6);
       },
     },
     pajarita: {
       name: 'Pajarita',
       draw(g) {
-        g.lineStyle(5, 0x1b4f72, 1);
-        g.strokeEllipse(100, 158, 80, 22);
+        collarBand(g, 158, 34, 8, 4, 0x1b4f72);
         setColor(g, 0x2980b9);
-        g.fillTriangle(89, 160, 100, 167, 89, 174);
-        g.fillTriangle(111, 160, 100, 167, 111, 174);
+        g.fillTriangle(78, 160, 100, 172, 78, 184);
+        g.fillTriangle(122, 160, 100, 172, 122, 184);
         setColor(g, 0x1b4f72);
-        g.fillCircle(100, 167, 4.5);
+        g.fillCircle(100, 172, 6);
       },
     },
     hueso: {
       name: 'Collar con hueso',
       draw(g) {
-        g.lineStyle(7, 0x7f8c8d, 1);
-        g.strokeEllipse(100, 158, 80, 22);
+        collarBand(g, 160, 38, 10, 7, 0x7f8c8d);
         setColor(g, 0xecf0f1);
-        g.fillRoundedRect(91, 167, 18, 7, 3);
-        g.fillCircle(91, 167, 4.5);
-        g.fillCircle(91, 174, 4.5);
-        g.fillCircle(109, 167, 4.5);
-        g.fillCircle(109, 174, 4.5);
+        g.fillRoundedRect(88, 170, 24, 9, 4);
+        g.fillCircle(88, 170, 5.5);
+        g.fillCircle(88, 179, 5.5);
+        g.fillCircle(112, 170, 5.5);
+        g.fillCircle(112, 179, 5.5);
       },
     },
     bufanda: {
       name: 'Bufanda',
       draw(g) {
-        g.lineStyle(15, 0xe67e22, 1);
-        g.strokeEllipse(100, 157, 84, 26);
+        collarBand(g, 159, 40, 12, 15, 0xe67e22);
         setColor(g, 0xaf601a);
-        g.fillRoundedRect(94, 172, 13, 22, 5);
+        g.fillRoundedRect(93, 172, 14, 28, 5);
       },
     },
     flores: {
       name: 'Collar de flores',
       draw(g) {
-        g.lineStyle(5, 0x27ae60, 1);
-        g.strokeEllipse(100, 158, 80, 22);
-        setColor(g, 0xe91e63);
-        [62, 81, 100, 119, 138].forEach((x) => g.fillCircle(x, x === 100 ? 170 : 165, 4.5));
-        setColor(g, 0xf1c40f);
-        [62, 81, 100, 119, 138].forEach((x) => g.fillCircle(x, x === 100 ? 170 : 165, 2));
+        collarBand(g, 160, 38, 10, 5, 0x27ae60);
+        [66, 83, 100, 117, 134].forEach((x) => drawFlower(g, x, x === 100 ? 174 : 168, 6, 0xe91e63, 0xf1c40f));
       },
     },
     perlas: {
@@ -495,43 +571,38 @@ Nonogram.Render = (() => {
       draw(g) {
         setColor(g, 0xfdfefe);
         const pearls = [
-          { x: 64, y: 158 }, { x: 78, y: 165 }, { x: 91, y: 170 }, { x: 100, y: 172 },
-          { x: 109, y: 170 }, { x: 122, y: 165 }, { x: 136, y: 158 },
+          { x: 64, y: 158 }, { x: 78, y: 166 }, { x: 91, y: 172 }, { x: 100, y: 174 },
+          { x: 109, y: 172 }, { x: 122, y: 166 }, { x: 136, y: 158 },
         ];
-        pearls.forEach((p) => g.fillCircle(p.x, p.y, 5));
+        pearls.forEach((p) => g.fillCircle(p.x, p.y, 5.5));
       },
     },
     campana: {
       name: 'Collar con campana',
       draw(g) {
-        g.lineStyle(8, 0xe74c3c, 1);
-        g.strokeEllipse(100, 158, 80, 22);
+        collarBand(g, 160, 38, 10, 8, 0xe74c3c);
         setColor(g, 0xf1c40f);
-        g.fillCircle(100, 172, 8);
+        g.fillCircle(100, 175, 9);
         setColor(g, 0xd4ac0d);
-        g.fillRect(97, 172, 6, 4);
+        g.fillRect(97, 175, 6, 4);
+        setColor(g, 0xb7791d);
+        g.fillCircle(100, 184, 2.5);
       },
     },
     corbata: {
       name: 'Corbata',
       draw(g) {
-        g.lineStyle(6, 0x2c3e50, 1);
-        g.strokeEllipse(100, 156, 80, 20);
+        collarBand(g, 158, 38, 9, 6, 0x2c3e50);
         setColor(g, 0xc0392b);
-        g.fillTriangle(92, 162, 108, 162, 100, 176);
-        g.fillTriangle(94, 176, 106, 176, 100, 210);
+        g.fillTriangle(91, 164, 109, 164, 100, 180);
+        g.fillTriangle(94, 180, 106, 180, 100, 210);
       },
     },
     estrellas: {
       name: 'Collar de estrellas',
       draw(g) {
-        g.lineStyle(5, 0x2980b9, 1);
-        g.strokeEllipse(100, 158, 80, 22);
-        setColor(g, 0xf1c40f);
-        [68, 88, 112, 132].forEach((x) => {
-          const y = x === 88 || x === 112 ? 170 : 165;
-          g.fillCircle(x, y, 5);
-        });
+        collarBand(g, 160, 38, 10, 5, 0x2980b9);
+        [68, 88, 112, 132].forEach((x) => drawStar(g, x, x === 88 || x === 112 ? 174 : 168, 6, 0xf1c40f));
       },
     },
     arcoiris: {
@@ -539,67 +610,68 @@ Nonogram.Render = (() => {
       draw(g) {
         const colors = [0xe74c3c, 0xf39c12, 0xf1c40f, 0x27ae60, 0x3498db];
         colors.forEach((c, i) => {
-          g.lineStyle(4, c, 1);
-          g.strokeEllipse(100, 152 + i * 4, 80 - i * 4, 20);
+          collarBand(g, 154 + i * 4, 39 - i * 2, 10, 4, c);
         });
       },
     },
   };
 
-  // --- Cajón / asiento: detrás del perro, parte inferior del lienzo ---
+  // --- Cajón / asiento: detrás del perro, parte inferior del lienzo. Es grande y baja
+  // bastante por debajo de las patas, para que se vea bien alrededor y por debajo de la
+  // silueta del perro (que ya no lo tapa por completo).
   const DRAWER = {
     caja: {
       name: 'Cajita de regalo',
       draw(g) {
         setColor(g, 0xffd3e8);
-        g.fillRoundedRect(14, 214, 172, 46, 12);
+        g.fillRoundedRect(6, 208, 188, 78, 16);
         setColor(g, 0xff9ec7);
-        g.fillRect(94, 214, 12, 46);
-        g.fillRect(14, 231, 172, 10);
+        g.fillRect(92, 208, 16, 78);
+        g.fillRect(6, 234, 188, 16);
         setColor(g, 0xff6fa5);
-        g.fillTriangle(78, 204, 100, 216, 78, 224);
-        g.fillTriangle(122, 204, 100, 216, 122, 224);
-        g.fillCircle(100, 216, 5);
+        g.fillTriangle(70, 194, 100, 212, 70, 228);
+        g.fillTriangle(130, 194, 100, 212, 130, 228);
+        g.fillCircle(100, 212, 7);
       },
     },
     cesta: {
       name: 'Cestita con corazón',
       draw(g) {
         setColor(g, 0xf3d9b1);
-        g.fillRoundedRect(14, 214, 172, 46, 20);
+        g.fillRoundedRect(6, 208, 188, 78, 30);
         g.lineStyle(3, 0xd8b98a, 1);
-        for (let y = 220; y <= 252; y += 9) {
+        for (let y = 216; y <= 278; y += 11) {
           g.beginPath();
-          g.moveTo(18, y);
-          g.lineTo(182, y);
+          g.moveTo(10, y);
+          g.lineTo(190, y);
           g.strokePath();
         }
-        drawHeart(g, 100, 216, 9, 0xf4a7b9);
+        drawHeart(g, 100, 212, 11, 0xf4a7b9);
       },
     },
     cojin: {
       name: 'Cojín de nube',
       draw(g) {
         setColor(g, 0xeaf6ff);
-        g.fillCircle(66, 244, 22);
-        g.fillCircle(92, 232, 26);
-        g.fillCircle(122, 232, 26);
-        g.fillCircle(148, 244, 22);
-        g.fillRoundedRect(56, 240, 100, 26, 16);
+        g.fillCircle(56, 258, 34);
+        g.fillCircle(90, 240, 40);
+        g.fillCircle(130, 240, 40);
+        g.fillCircle(158, 258, 34);
+        g.fillRoundedRect(40, 250, 134, 40, 20);
         setColor(g, 0xbfe3f7);
-        g.fillCircle(90, 244, 3);
-        g.fillCircle(110, 244, 3);
+        g.fillCircle(88, 262, 4);
+        g.fillCircle(112, 262, 4);
       },
     },
     manta: {
       name: 'Manta de rayitas pastel',
       draw(g) {
         setColor(g, 0xffe9c7);
-        g.fillRoundedRect(14, 214, 172, 46, 12);
+        g.fillRoundedRect(6, 208, 188, 78, 16);
         setColor(g, 0xffcf94);
-        g.fillRect(14, 223, 172, 5);
-        g.fillRect(14, 238, 172, 5);
-        g.fillRect(14, 253, 172, 4);
+        g.fillRect(6, 220, 188, 8);
+        g.fillRect(6, 242, 188, 8);
+        g.fillRect(6, 264, 188, 8);
       },
     },
     alfombra: {
@@ -608,7 +680,7 @@ Nonogram.Render = (() => {
         const colors = [0xffd3e0, 0xffe7c2, 0xfff6b8, 0xc9f0d1, 0xc6e6fb];
         colors.forEach((c, i) => {
           setColor(g, c);
-          g.fillEllipse(100, 248, 182 - i * 16, 36 - i * 3);
+          g.fillEllipse(100, 272, 196 - i * 18, 42 - i * 4);
         });
       },
     },
@@ -616,72 +688,72 @@ Nonogram.Render = (() => {
       name: 'Cama con corazones',
       draw(g) {
         setColor(g, 0xffe1ec);
-        g.fillEllipse(100, 244, 178, 44);
-        g.lineStyle(9, 0xffb6c9, 1);
-        g.strokeEllipse(100, 240, 166, 34);
-        drawHeart(g, 100, 240, 9, 0xff9ec7);
+        g.fillEllipse(100, 262, 192, 56);
+        g.lineStyle(11, 0xffb6c9, 1);
+        g.strokeEllipse(100, 256, 178, 42);
+        drawHeart(g, 100, 256, 11, 0xff9ec7);
       },
     },
     tronco: {
       name: 'Tronco con setas',
       draw(g) {
         setColor(g, 0xc39066);
-        g.fillRoundedRect(24, 210, 152, 50, 14);
+        g.fillRoundedRect(14, 212, 172, 76, 18);
         g.lineStyle(3, 0x9c6b41, 1);
-        g.strokeEllipse(48, 235, 30, 46);
-        g.strokeEllipse(100, 235, 20, 46);
-        g.strokeEllipse(150, 235, 26, 46);
+        g.strokeEllipse(46, 250, 32, 62);
+        g.strokeEllipse(100, 250, 22, 62);
+        g.strokeEllipse(154, 250, 28, 62);
         setColor(g, 0xffffff);
-        g.fillRect(132, 202, 5, 10);
-        g.fillRect(150, 200, 5, 12);
+        g.fillRect(136, 200, 6, 12);
+        g.fillRect(156, 198, 6, 14);
         setColor(g, 0xe74c3c);
-        g.fillCircle(134, 198, 8);
-        g.fillCircle(152, 196, 9);
+        g.fillCircle(139, 195, 9);
+        g.fillCircle(159, 193, 10);
         setColor(g, 0xffffff);
-        g.fillCircle(131, 195, 2);
-        g.fillCircle(137, 200, 2);
-        g.fillCircle(149, 193, 2);
-        g.fillCircle(155, 199, 2);
+        g.fillCircle(136, 192, 2.2);
+        g.fillCircle(142, 198, 2.2);
+        g.fillCircle(155, 190, 2.2);
+        g.fillCircle(163, 196, 2.2);
       },
     },
     nube: {
       name: 'Nube con estrellas',
       draw(g) {
         setColor(g, 0xffffff);
-        g.fillCircle(60, 236, 26);
-        g.fillCircle(90, 222, 30);
-        g.fillCircle(124, 222, 30);
-        g.fillCircle(150, 236, 26);
-        g.fillRect(50, 236, 110, 22);
-        drawStar(g, 40, 214, 6, 0xffe27a);
-        drawStar(g, 164, 210, 7, 0xffe27a);
-        drawStar(g, 100, 200, 5, 0xffe27a);
+        g.fillCircle(50, 258, 30);
+        g.fillCircle(88, 240, 36);
+        g.fillCircle(132, 240, 36);
+        g.fillCircle(166, 258, 30);
+        g.fillRoundedRect(38, 250, 138, 30, 16);
+        drawStar(g, 26, 224, 7, 0xffe27a);
+        drawStar(g, 178, 220, 8, 0xffe27a);
+        drawStar(g, 100, 208, 6, 0xffe27a);
       },
     },
     hierba: {
       name: 'Jardín de flores',
       draw(g) {
         setColor(g, 0x8fe0a8);
-        g.fillRoundedRect(14, 226, 172, 34, 8);
+        g.fillRoundedRect(6, 232, 188, 52, 12);
         setColor(g, 0x6fd191);
-        for (let x = 22; x <= 178; x += 12) {
-          g.fillTriangle(x - 5, 226, x + 5, 226, x, 210);
+        for (let x = 14; x <= 190; x += 14) {
+          g.fillTriangle(x - 6, 232, x + 6, 232, x, 208);
         }
-        drawFlower(g, 45, 218, 6, 0xffb6c9, 0xfff3a0);
-        drawFlower(g, 100, 214, 6, 0xffffff, 0xfff3a0);
-        drawFlower(g, 155, 218, 6, 0xaed6f1, 0xfff3a0);
+        drawFlower(g, 36, 222, 7, 0xffb6c9, 0xfff3a0);
+        drawFlower(g, 100, 216, 7, 0xffffff, 0xfff3a0);
+        drawFlower(g, 164, 222, 7, 0xaed6f1, 0xfff3a0);
       },
     },
     lunares: {
       name: 'Alfombra de lunares pastel',
       draw(g) {
         setColor(g, 0xfff0f5);
-        g.fillEllipse(100, 248, 182, 40);
+        g.fillEllipse(100, 268, 196, 48);
         const dots = [0xffb6c9, 0xaed6f1, 0xfff3a0, 0xc9f0d1, 0xd6b8f0];
         let i = 0;
-        for (let x = 34; x <= 166; x += 22) {
+        for (let x = 24; x <= 176; x += 20) {
           setColor(g, dots[i % dots.length]);
-          g.fillCircle(x, 248, 9);
+          g.fillCircle(x, 268, 10);
           i += 1;
         }
       },
@@ -703,9 +775,9 @@ Nonogram.Render = (() => {
   function buildDogContainer(scene, x, y, equipped) {
     const container = scene.add.container(x, y);
     const layers = {};
-    // El cajón va detrás; la ropa y el collar se redibujan con sus propias patas/cuerpo
-    // encima del perro base, y el gorro va delante de todo.
-    const order = ['drawer', 'dog', 'collar', 'clothing', 'headwear'];
+    // El cajón va detrás; la ropa se dibuja encima del perro base, el collar encima de la
+    // ropa (como un collar real, que siempre queda visible por fuera) y el gorro delante de todo.
+    const order = ['drawer', 'dog', 'clothing', 'collar', 'headwear'];
     order.forEach((layer) => {
       const g = scene.add.graphics();
       if (layer === 'dog') {

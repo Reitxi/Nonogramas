@@ -18,7 +18,7 @@ Nonogram.Scenes.MenuScene = class MenuScene extends Phaser.Scene {
     Nonogram.Render.buildDogContainer(this, 650, 15, equipped).setScale(0.55);
 
     const customizeBtn = this.add
-      .text(650, 170, 'Personalizar >', {
+      .text(650, 190, 'Personalizar >', {
         fontSize: '18px',
         color: '#2c3e50',
         backgroundColor: '#ffffffcc',

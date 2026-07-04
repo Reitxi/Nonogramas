@@ -19,7 +19,7 @@ Nonogram.Scenes.CustomizeScene = class CustomizeScene extends Phaser.Scene {
     this.dogContainer.setScale(1.4);
 
     const backBtn = this.add
-      .text(30, 490, '< Volver al menú', {
+      .text(30, 560, '< Volver al menú', {
         fontSize: '18px',
         color: '#2c3e50',
         backgroundColor: '#ffffffcc',
