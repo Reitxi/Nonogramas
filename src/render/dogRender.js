@@ -442,20 +442,20 @@ Nonogram.Render = (() => {
       name: 'Corona',
       draw(g) {
         setColor(g, 0xf1c40f);
-        g.fillEllipse(100, 76, 90, 14);
+        g.fillEllipse(100, 69, 90, 12);
         g.fillPoints(
           [
-            { x: 58, y: 78 }, { x: 62, y: 46 }, { x: 78, y: 64 },
-            { x: 100, y: 40 }, { x: 122, y: 64 }, { x: 138, y: 46 },
-            { x: 142, y: 78 },
+            { x: 58, y: 71 }, { x: 62, y: 39 }, { x: 78, y: 57 },
+            { x: 100, y: 33 }, { x: 122, y: 57 }, { x: 138, y: 39 },
+            { x: 142, y: 71 },
           ],
           true
         );
         setColor(g, 0xe74c3c);
-        g.fillCircle(100, 52, 5);
+        g.fillCircle(100, 45, 5);
         setColor(g, 0x3498db);
-        g.fillCircle(78, 62, 4);
-        g.fillCircle(122, 62, 4);
+        g.fillCircle(78, 55, 4);
+        g.fillCircle(122, 55, 4);
       },
     },
     gafas: {
@@ -471,28 +471,28 @@ Nonogram.Render = (() => {
       name: 'Gorro de fiesta',
       draw(g) {
         setColor(g, 0x8e44ad);
-        g.fillEllipse(100, 78, 76, 16);
-        g.fillTriangle(64, 80, 136, 80, 100, 26);
+        g.fillEllipse(100, 71, 76, 14);
+        g.fillTriangle(64, 73, 136, 73, 100, 19);
         setColor(g, 0xffffff);
-        g.fillCircle(85, 64, 3.5);
-        g.fillCircle(115, 64, 3.5);
-        g.fillCircle(90, 72, 3.5);
-        g.fillCircle(110, 72, 3.5);
-        g.fillCircle(100, 68, 3.5);
+        g.fillCircle(85, 57, 3.5);
+        g.fillCircle(115, 57, 3.5);
+        g.fillCircle(90, 65, 3.5);
+        g.fillCircle(110, 65, 3.5);
+        g.fillCircle(100, 61, 3.5);
         setColor(g, 0xe74c3c);
-        g.fillCircle(100, 26, 8);
+        g.fillCircle(100, 19, 7);
       },
     },
     mago: {
       name: 'Sombrero de mago',
       draw(g) {
         setColor(g, 0x4b3f8f);
-        g.fillEllipse(100, 78, 108, 14);
-        g.fillTriangle(68, 80, 132, 80, 100, 20);
+        g.fillEllipse(100, 71, 108, 12);
+        g.fillTriangle(68, 73, 132, 73, 100, 13);
         setColor(g, 0xf1c40f);
-        g.fillEllipse(100, 66, 66, 9);
-        drawStar(g, 88, 46, 5, 0xffffff);
-        drawStar(g, 112, 36, 4, 0xffffff);
+        g.fillEllipse(100, 59, 66, 8);
+        drawStar(g, 88, 39, 5, 0xffffff);
+        drawStar(g, 112, 29, 4, 0xffffff);
       },
     },
     graduacion: {
