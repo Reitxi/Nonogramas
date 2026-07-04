@@ -64,6 +64,30 @@ Nonogram.Render = (() => {
     g.fillPoints(BODY_POINTS, true);
   }
 
+  // La ropa solo cubre el torso (hasta justo antes de la muesca de las patas), para que
+  // las patas siempre se vean con su color de pelaje natural por debajo de la prenda.
+  const TORSO_POINTS = [
+    { x: 100, y: 150 },
+    { x: 122, y: 152 },
+    { x: 142, y: 160 },
+    { x: 153, y: 175 },
+    { x: 157, y: 195 },
+    { x: 153, y: 210 },
+    { x: 144, y: 222 },
+    { x: 100, y: 226 },
+    { x: 56, y: 222 },
+    { x: 47, y: 210 },
+    { x: 43, y: 195 },
+    { x: 47, y: 175 },
+    { x: 58, y: 160 },
+    { x: 78, y: 152 },
+  ];
+
+  function torsoFit(g, color) {
+    setColor(g, color);
+    g.fillPoints(TORSO_POINTS, true);
+  }
+
   function drawDogBase(g) {
     // cuerpo
     bodySilhouette(g, DOG.furBase);
@@ -102,46 +126,46 @@ Nonogram.Render = (() => {
     g.fillCircle(125, 84, 3);
   }
 
-  // --- Ropa: siempre redibuja la silueta del cuerpo para que quede ajustada ---
+  // --- Ropa: cubre solo el torso (ver torsoFit) para que las patas queden a la vista ---
   const CLOTHING = {
     sudadera: {
       name: 'Sudadera azul',
       draw(g) {
-        bodySilhouette(g, 0x3498db);
+        torsoFit(g, 0x3498db);
         setColor(g, 0x2874a6);
         g.fillEllipse(100, 162, 70, 20);
-        g.fillRoundedRect(85, 208, 30, 16, 6);
+        g.fillRoundedRect(85, 200, 30, 14, 6);
       },
     },
     rayas: {
       name: 'Camiseta a rayas',
       draw(g) {
-        bodySilhouette(g, 0xecf0f1);
+        torsoFit(g, 0xecf0f1);
         setColor(g, 0xe74c3c);
-        g.fillEllipse(100, 190, 122, 13);
-        g.fillEllipse(100, 210, 132, 13);
-        g.fillEllipse(100, 230, 116, 13);
+        g.fillEllipse(100, 178, 128, 12);
+        g.fillEllipse(100, 196, 132, 12);
+        g.fillEllipse(100, 214, 122, 12);
       },
     },
     chaqueta: {
       name: 'Chaqueta verde',
       draw(g) {
-        bodySilhouette(g, 0x27ae60);
+        torsoFit(g, 0x27ae60);
         setColor(g, 0x1e8449);
         g.fillEllipse(100, 162, 70, 20);
-        g.fillRect(97, 172, 6, 66);
+        g.fillRect(97, 172, 6, 50);
         setColor(g, 0xf1c40f);
-        g.fillCircle(100, 188, 4);
-        g.fillCircle(100, 206, 4);
-        g.fillCircle(100, 224, 4);
+        g.fillCircle(100, 186, 4);
+        g.fillCircle(100, 202, 4);
+        g.fillCircle(100, 218, 4);
       },
     },
     vestido: {
       name: 'Vestido rosa',
       draw(g) {
         setColor(g, 0xf78fb3);
-        g.fillEllipse(100, 236, 164, 52);
-        bodySilhouette(g, 0xf78fb3);
+        g.fillEllipse(100, 222, 150, 36);
+        torsoFit(g, 0xf78fb3);
         setColor(g, 0xffffff);
         g.fillEllipse(100, 162, 20, 12);
       },
@@ -149,12 +173,12 @@ Nonogram.Render = (() => {
     chaleco: {
       name: 'Chaleco a cuadros',
       draw(g) {
-        bodySilhouette(g, 0xf5eee6);
+        torsoFit(g, 0xf5eee6);
         setColor(g, 0x8d6748);
-        for (let row = 0; row < 3; row++) {
+        for (let row = 0; row < 2; row++) {
           for (let col = 0; col < 3; col++) {
             if ((row + col) % 2 === 0) {
-              g.fillRect(78 + col * 16, 186 + row * 16, 14, 14);
+              g.fillRect(78 + col * 16, 184 + row * 17, 14, 14);
             }
           }
         }
@@ -163,7 +187,7 @@ Nonogram.Render = (() => {
     camiseta: {
       name: 'Camiseta amarilla',
       draw(g) {
-        bodySilhouette(g, 0xf4d03f);
+        torsoFit(g, 0xf4d03f);
         setColor(g, 0xd4ac0d);
         g.fillEllipse(100, 162, 66, 18);
       },
@@ -171,41 +195,34 @@ Nonogram.Render = (() => {
     peto: {
       name: 'Peto vaquero',
       draw(g) {
-        bodySilhouette(g, 0xecf0f1);
+        torsoFit(g, 0xecf0f1);
         setColor(g, 0x4a69bd);
-        g.fillPoints(
-          [
-            { x: 62, y: 175 }, { x: 138, y: 175 }, { x: 150, y: 253 },
-            { x: 108, y: 253 }, { x: 108, y: 210 }, { x: 92, y: 210 },
-            { x: 92, y: 253 }, { x: 50, y: 253 },
-          ],
-          true
-        );
-        g.fillRoundedRect(72, 158, 12, 22, 4);
-        g.fillRoundedRect(116, 158, 12, 22, 4);
+        g.fillRoundedRect(78, 168, 44, 52, 8);
+        g.fillRoundedRect(72, 155, 10, 20, 4);
+        g.fillRoundedRect(118, 155, 10, 20, 4);
         setColor(g, 0xf4d03f);
-        g.fillCircle(100, 190, 3.5);
+        g.fillCircle(100, 180, 3.5);
       },
     },
     poncho: {
       name: 'Poncho arcoíris',
       draw(g) {
-        bodySilhouette(g, 0xecf0f1);
+        torsoFit(g, 0xecf0f1);
         const colors = [0xe74c3c, 0xf39c12, 0xf1c40f, 0x27ae60, 0x3498db, 0x8e44ad];
         colors.forEach((c, i) => {
           setColor(g, c);
-          g.fillEllipse(100, 178 + i * 13, 138 - i * 4, 13);
+          g.fillEllipse(100, 166 + i * 10, 132 - i * 6, 10);
         });
       },
     },
     abrigo: {
       name: 'Abrigo de invierno',
       draw(g) {
-        bodySilhouette(g, 0xf5f5f5);
+        torsoFit(g, 0xf5f5f5);
         setColor(g, 0xd6dbdf);
-        g.fillRect(97, 168, 6, 84);
-        g.fillRect(60, 195, 84, 6);
-        g.fillRect(60, 222, 84, 6);
+        g.fillRect(97, 168, 6, 54);
+        g.fillRect(62, 188, 80, 6);
+        g.fillRect(62, 208, 80, 6);
         setColor(g, 0xffffff);
         [66, 82, 100, 118, 134].forEach((x) => g.fillCircle(x, 163, 8));
       },
@@ -213,12 +230,12 @@ Nonogram.Render = (() => {
     futbol: {
       name: 'Camiseta de fútbol',
       draw(g) {
-        bodySilhouette(g, 0xffffff);
+        torsoFit(g, 0xffffff);
         setColor(g, 0xe74c3c);
         g.fillEllipse(100, 162, 70, 18);
-        g.fillRect(94, 175, 12, 60);
+        g.fillRect(94, 175, 12, 45);
         setColor(g, 0x2c3e50);
-        g.fillCircle(100, 200, 8);
+        g.fillCircle(100, 198, 8);
       },
     },
   };
