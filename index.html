@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Nonogramas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 175'><ellipse cx='56' cy='112' rx='16' ry='39' fill='%23c9a876'/><ellipse cx='144' cy='112' rx='16' ry='39' fill='%23c9a876'/><ellipse cx='100' cy='100' rx='50' ry='46' fill='%23e3c99b'/><ellipse cx='100' cy='119' rx='29' ry='23' fill='%23f5ecd9'/><ellipse cx='100' cy='108' rx='8.5' ry='6' fill='%232b2019'/><ellipse cx='78' cy='90' rx='7' ry='8' fill='%233b2412'/><ellipse cx='122' cy='90' rx='7' ry='8' fill='%233b2412'/><circle cx='81' cy='86' r='1.8' fill='white'/><circle cx='125' cy='86' r='1.8' fill='white'/></svg>" />
   <style>
     html, body {
       margin: 0;
@@ -19,7 +20,16 @@
 </head>
 <body>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
-  <script src="src/puzzles.js"></script>
+  <!-- Orden de carga importante: core primero, luego render (lo usa customization.js), luego el resto de data, las escenas y main.js el último. -->
+  <script src="src/core/state.js"></script>
+  <script src="src/core/clues.js"></script>
+  <script src="src/render/dogRender.js"></script>
+  <script src="src/data/puzzles.js"></script>
+  <script src="src/data/customization.js"></script>
+  <script src="src/scenes/BootScene.js"></script>
+  <script src="src/scenes/MenuScene.js"></script>
+  <script src="src/scenes/CustomizeScene.js"></script>
+  <script src="src/scenes/NonogramScene.js"></script>
   <script src="src/main.js"></script>
 </body>
 </html>
